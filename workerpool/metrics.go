@@ -105,14 +105,20 @@ func (m *WorkerPoolMetrics) Summary() string {
 	defer m.mu.Unlock()
 	
 	totalDuration := m.EndTime.Sub(m.StartTime)
-	throughput := float64(m.JobsProcessed) / totalDuration.Seconds()
+	throughput := 0.0
+	if totalDuration > 0 {
+		throughput = float64(m.JobsProcessed) / totalDuration.Seconds()
+	}
 	
 	// Calculate average processing time
 	var totalProcessingTime time.Duration
 	for _, duration := range m.ProcessingTime {
 		totalProcessingTime += duration
 	}
-	avgProcessingTime := totalProcessingTime / time.Duration(len(m.ProcessingTime))
+	avgProcessingTime := time.Duration(0)
+	if len(m.ProcessingTime) > 0 {
+		avgProcessingTime = totalProcessingTime / time.Duration(len(m.ProcessingTime))
+	}
 	
 	// Calculate worker utilization
 	workerUtilization := make(map[int]float64)
